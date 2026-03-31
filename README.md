@@ -2,7 +2,7 @@
 
 A modern, interactive terminal-style personal portfolio built with **Next.js**, **TypeScript**, and **Tailwind CSS**. Browse projects, check contact info, and explore a fully functional terminal experience directly in your browser.
 
-**Live Demo**: [terminal-portfolio.vercel.app](https://terminal-portfolio-blush-five.vercel.app/)  
+**Live Demo**: [https://terminal-portfolio-blush-five.vercel.app/](https://terminal-portfolio-blush-five.vercel.app/)  
 **Author**: [Fatin Abrar Ankon](https://github.com/ankondeadlarx)
 
 ## 📸 Screenshot
