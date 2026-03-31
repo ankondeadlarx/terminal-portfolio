@@ -5,6 +5,10 @@ A modern, interactive terminal-style personal portfolio built with **Next.js**, 
 **Live Demo**: [terminal-portfolio.vercel.app](https://terminal-portfolio.vercel.app)  
 **Author**: [Fatin Abrar Ankon](https://github.com/ankondeadlarx)
 
+## 📸 Screenshot
+
+![Terminal Portfolio Screenshot](./screenshot-2026-03-30_21-32-52.png)
+
 ---
 
 ## ✨ Features
