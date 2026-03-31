@@ -4,8 +4,17 @@ export async function GET(req: NextRequest) {
   const addr = req.nextUrl.searchParams.get("addr") ?? "";
   const url  = addr ? `https://ipapi.co/${encodeURIComponent(addr)}/json/` : "https://ipapi.co/json/";
   try {
-    const r = await fetch(url, { next: { revalidate: 60 } });
-    if (!r.ok) return NextResponse.json({ error: "IP lookup failed." }, { status: 503 });
+    const r = await fetch(url, { next: { revalidate: 60 }, signal: AbortSignal.timeout(5000) }).catch(() => null);
+    if (!r?.ok) {
+      // Fallback: return localhost info
+      return NextResponse.json({
+        ip:      addr || "127.0.0.1",
+        city:    "Local",
+        region:  "Local",
+        country: "Local",
+        org:     "Your device",
+      });
+    }
     const d = await r.json();
     if (d.error) return NextResponse.json({ error: d.reason || "IP not found." }, { status: 404 });
     return NextResponse.json({
@@ -16,6 +25,6 @@ export async function GET(req: NextRequest) {
       org:     d.org     || "N/A",
     });
   } catch {
-    return NextResponse.json({ error: "IP service unavailable." }, { status: 503 });
+    return NextResponse.json({ error: "IP service temporarily unavailable. Try again soon." }, { status: 503 });
   }
 }

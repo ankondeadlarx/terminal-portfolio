@@ -11,29 +11,35 @@ export async function GET(req: NextRequest) {
     if (city) {
       const geo = await fetch(
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,
-        { next: { revalidate: 3600 } }
-      );
-      if (!geo.ok) return NextResponse.json({ error: "City not found." }, { status: 404 });
+        { next: { revalidate: 3600 }, signal: AbortSignal.timeout(5000) }
+      ).catch(() => null);
+      if (!geo?.ok) return NextResponse.json({ error: "City not found. Please try another city." }, { status: 404 });
       const geoData = await geo.json();
       if (!geoData.results?.length) return NextResponse.json({ error: `City not found: ${city}` }, { status: 404 });
       lat = geoData.results[0].latitude;
       lon = geoData.results[0].longitude;
       resolvedCity = geoData.results[0].name;
     } else {
-      const ip = await fetch("https://ipapi.co/json/", { next: { revalidate: 3600 } });
-      if (!ip.ok) return NextResponse.json({ error: "Could not detect location." }, { status: 503 });
-      const ipData = await ip.json();
-      lat = ipData.latitude;
-      lon = ipData.longitude;
-      resolvedCity = ipData.city || "Unknown";
+      const ip = await fetch("https://ipapi.co/json/", { next: { revalidate: 3600 }, signal: AbortSignal.timeout(5000) }).catch(() => null);
+      if (!ip?.ok) {
+        // Fallback: return default location
+        lat = 40.7128;
+        lon = -74.0060;
+        resolvedCity = "New York (default)";
+      } else {
+        const ipData = await ip.json();
+        lat = ipData.latitude;
+        lon = ipData.longitude;
+        resolvedCity = ipData.city || "Unknown";
+      }
     }
 
     // Step 2: Get weather
     const wRes = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,weather_code&timezone=auto`,
-      { next: { revalidate: 600 } }
-    );
-    if (!wRes.ok) return NextResponse.json({ error: "Weather fetch failed." }, { status: 503 });
+      { next: { revalidate: 600 }, signal: AbortSignal.timeout(5000) }
+    ).catch(() => null);
+    if (!wRes?.ok) return NextResponse.json({ error: "Weather service unavailable. Please try again later." }, { status: 503 });
     const wData = await wRes.json();
     const cur   = wData.current;
 
